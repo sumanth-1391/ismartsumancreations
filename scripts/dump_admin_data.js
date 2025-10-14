@@ -1,5 +1,4 @@
 import http from 'http';
-import { request as rq } from 'http';
 
 const fetchJson = (path) => new Promise((resolve, reject) => {
   const opts = { hostname: '127.0.0.1', port: 5001, path, method: 'GET' };

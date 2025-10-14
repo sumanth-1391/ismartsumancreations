@@ -1,8 +1,10 @@
 import { useEffect, useReducer } from 'react';
 
-const API_BASE_URL = process.env.NODE_ENV === 'production'
-  ? 'https://your-deployed-server.com'
-  : 'http://localhost:5001';
+// For production, allow using an environment variable set by Vercel: REACT_APP_API_BASE_URL
+// Fallback to same-origin (window.location.origin) so APIs hosted on the same domain work.
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || (process.env.NODE_ENV === 'production'
+  ? (typeof window !== 'undefined' ? window.location.origin : 'https://your-deployed-server.com')
+  : 'http://localhost:5001');
 
 // Custom hook for admin-managed video data
 export const useYouTubeData = () => {

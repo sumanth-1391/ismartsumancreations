@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-const API_BASE_URL = process.env.NODE_ENV === 'production'
-  ? 'https://your-deployed-server.com'
-  : 'http://localhost:5001';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || (process.env.NODE_ENV === 'production'
+  ? (typeof window !== 'undefined' ? window.location.origin : 'https://your-deployed-server.com')
+  : 'http://localhost:5001');
 
 const AnnouncementsContainer = styled.div`
   background-color: #141414;
