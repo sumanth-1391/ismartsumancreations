@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 
-const API_BASE_URL = process.env.NODE_ENV === 'production'
-  ? 'https://your-deployed-server.com'
-  : 'http://localhost:5001';
+// Resolve API base URL: use REACT_APP_API_BASE_URL when set (e.g. in Vercel),
+// otherwise use same-origin in production or localhost in development.
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || (process.env.NODE_ENV === 'production'
+  ? (typeof window !== 'undefined' ? window.location.origin : 'https://your-deployed-server.com')
+  : 'http://localhost:5001');
 
 const ADMIN_PASSWORD = 'Isc139'; // Change this to your desired password
 
