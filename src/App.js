@@ -57,6 +57,8 @@ const NoResults = styled.div`
 
 function MainPage() {
   const { featuredVideo, videoRows, loading, error, uploadedVideos, announcements, discussions } = useYouTubeData();
+  // Debug state to surface production fetch status
+  const [debugStatus, setDebugStatus] = useState({ lastFetch: null, videos: 0, announcements: 0, discussions: 0, ok: false });
   const [currentVideo, setCurrentVideo] = useState(null);
   const [filteredRows, setFilteredRows] = useState([]);
   const [playingVideo, setPlayingVideo] = useState(null);
@@ -70,6 +72,14 @@ function MainPage() {
     if (videoRows.length > 0 && filteredRows.length === 0) {
       setFilteredRows(videoRows);
     }
+    // update debug banner whenever data changes
+    setDebugStatus({
+      lastFetch: new Date().toLocaleString(),
+      videos: uploadedVideos?.length || 0,
+      announcements: announcements?.length || 0,
+      discussions: discussions?.length || 0,
+      ok: !loading && !error
+    });
   }, [featuredVideo, videoRows, currentVideo, filteredRows]);
 
   // Filter rows based on showOnlyRecommended state
@@ -199,6 +209,10 @@ function MainPage() {
 
   return (
     <AppContainer>
+      {/* DEBUG BANNER - visible in production to help troubleshooting */}
+      <div style={{ background: '#222', color: '#fff', padding: '6px 12px', textAlign: 'center' }}> 
+        <strong>Debug:</strong> Last fetch: {debugStatus.lastFetch || '—'} | Videos: {debugStatus.videos} | Announcements: {debugStatus.announcements} | Discussions: {debugStatus.discussions} | Status: {debugStatus.ok ? 'OK' : (loading ? 'Loading' : (error ? 'Error' : 'Idle'))}
+      </div>
       <Header onSearch={handleSearch} videos={uploadedVideos} onNavClick={(navItem) => {
         if (navItem === 'Recommended for You') {
           setShowOnlyRecommended(true);
