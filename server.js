@@ -1,5 +1,7 @@
 import cors from 'cors';
 import express from 'express';
+import fs from 'fs';
+import path from 'path';
 
 const app = express();
 const PORT = 5001; // ← your curl command used 5001
@@ -60,6 +62,75 @@ let videos = [
 ];
 
 let announcements = [];
+
+// File paths for JSON files that power the deployed serverless endpoints
+const DATA_JSON_PATH = path.join(process.cwd(), 'data.json');
+const ANNOUNCEMENTS_JSON_PATH = path.join(process.cwd(), 'announcements.json');
+const DISCUSSIONS_JSON_PATH = path.join(process.cwd(), 'discussions.json');
+
+// GitHub commit settings (for commit-on-upload persistence)
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+const GITHUB_REPO = process.env.GITHUB_REPO || 'sumanth-1391/ismartsumancreations'; // owner/repo
+const GITHUB_BRANCH = process.env.GITHUB_BRANCH || 'main';
+
+async function githubGetFileSha(repoPath) {
+  if (!GITHUB_TOKEN) return null;
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${repoPath}?ref=${GITHUB_BRANCH}`;
+  try {
+    const res = await fetch(url, { headers: { Authorization: `token ${GITHUB_TOKEN}`, 'User-Agent': 'ismart-server' } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.sha;
+  } catch (err) {
+    console.error('githubGetFileSha error', err);
+    return null;
+  }
+}
+
+async function githubPutFile(repoPath, contentBuffer, message) {
+  if (!GITHUB_TOKEN) {
+    console.warn('GITHUB_TOKEN not set; skipping GitHub commit');
+    return { ok: false, message: 'no-token' };
+  }
+  const sha = await githubGetFileSha(repoPath);
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${repoPath}`;
+  const body = {
+    message,
+    content: contentBuffer.toString('base64'),
+    branch: GITHUB_BRANCH
+  };
+  if (sha) body.sha = sha;
+  try {
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`,
+        'User-Agent': 'ismart-server',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      console.error('GitHub commit failed', data);
+      return { ok: false, data };
+    }
+    return { ok: true, data };
+  } catch (err) {
+    console.error('githubPutFile error', err);
+    return { ok: false, error: err };
+  }
+}
+
+function writeJsonFileSafe(filePath, obj) {
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(obj, null, 2), 'utf8');
+    return true;
+  } catch (err) {
+    console.error('Error writing file', filePath, err);
+    return false;
+  }
+}
 
 // ✅ GET discussions
 app.get('/api/discussions', (req, res) => {
@@ -145,6 +216,16 @@ app.post('/api/videos', (req, res) => {
     };
     videos.push(created);
     // also optionally create an announcement externally; Admin UI handles that
+    // Persist to disk and attempt to commit to GitHub so deployed site picks up the change
+    try {
+      writeJsonFileSafe(DATA_JSON_PATH, { videos });
+      // Fire-and-forget GitHub commit
+      githubPutFile('data.json', Buffer.from(JSON.stringify({ videos }, null, 2), 'utf8'), `chore: add video ${created.id}`)
+        .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); });
+    } catch (err) {
+      console.warn('Failed to persist videos locally', err);
+    }
+
     res.status(201).json(created);
   } catch (err) {
     console.error('Error creating video:', err);
@@ -167,6 +248,13 @@ app.put('/api/videos/:id', (req, res) => {
       thumbnail: updated.thumbnail || videos[idx].thumbnail || buildYouTubeThumbnail(updated.url) || '/logo.png'
     };
     videos[idx] = merged;
+    try {
+      writeJsonFileSafe(DATA_JSON_PATH, { videos });
+      githubPutFile('data.json', Buffer.from(JSON.stringify({ videos }, null, 2), 'utf8'), `chore: update video ${id}`)
+        .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); });
+    } catch (err) {
+      console.warn('Failed to persist videos locally', err);
+    }
     res.status(200).json(merged);
   } catch (err) {
     console.error('Error updating video:', err);
@@ -181,6 +269,13 @@ app.delete('/api/videos/:id', (req, res) => {
     const before = videos.length;
     videos = videos.filter(v => String(v.id) !== String(id));
     if (videos.length === before) return res.status(404).json({ message: 'Video not found' });
+    try {
+      writeJsonFileSafe(DATA_JSON_PATH, { videos });
+      githubPutFile('data.json', Buffer.from(JSON.stringify({ videos }, null, 2), 'utf8'), `chore: delete video ${id}`)
+        .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); });
+    } catch (err) {
+      console.warn('Failed to persist videos locally', err);
+    }
     res.status(200).json({ message: 'Video deleted' });
   } catch (err) {
     console.error('Error deleting video:', err);
@@ -203,6 +298,13 @@ app.post('/api/announcements', (req, res) => {
       return res.status(400).json({ message: 'Invalid announcement payload' });
     }
     announcements.push(announcement);
+    try {
+      writeJsonFileSafe(ANNOUNCEMENTS_JSON_PATH, { announcements });
+      githubPutFile('announcements.json', Buffer.from(JSON.stringify({ announcements }, null, 2), 'utf8'), `chore: add announcement ${announcement.id}`)
+        .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); });
+    } catch (err) {
+      console.warn('Failed to persist announcements locally', err);
+    }
     res.status(201).json(announcement);
   } catch (err) {
     console.error('Error creating announcement:', err);
@@ -216,6 +318,13 @@ app.delete('/api/announcements/:id', (req, res) => {
     const before = announcements.length;
     announcements = announcements.filter(a => String(a.id) !== String(id));
     if (announcements.length === before) return res.status(404).json({ message: 'Announcement not found' });
+    try {
+      writeJsonFileSafe(ANNOUNCEMENTS_JSON_PATH, { announcements });
+      githubPutFile('announcements.json', Buffer.from(JSON.stringify({ announcements }, null, 2), 'utf8'), `chore: delete announcement ${id}`)
+        .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); });
+    } catch (err) {
+      console.warn('Failed to persist announcements locally', err);
+    }
     res.status(200).json({ message: 'Announcement deleted' });
   } catch (err) {
     console.error('Error deleting announcement:', err);
@@ -243,6 +352,13 @@ app.post('/api/discussions', (req, res) => {
     };
 
     discussions.push(newDiscussion);
+    try {
+      writeJsonFileSafe(DISCUSSIONS_JSON_PATH, { discussions });
+      githubPutFile('discussions.json', Buffer.from(JSON.stringify({ discussions }, null, 2), 'utf8'), `chore: add discussion ${newDiscussion.id}`)
+        .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); });
+    } catch (err) {
+      console.warn('Failed to persist discussions locally', err);
+    }
     res.status(201).json({
       message: 'Discussion posted successfully',
       newDiscussion,
