@@ -1,0 +1,15 @@
+{
+  "discussions": [
+    {
+      "id": "1760456073441",
+      "title": "hi",
+      "content": "hi",
+      "type": "poll",
+      "createdAt": "2025-10-14T15:34:33.442Z",
+      "pollOptions": [
+        "a",
+        "a"
+      ]
+    }
+  ]
+}
