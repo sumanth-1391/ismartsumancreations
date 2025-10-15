@@ -275,7 +275,7 @@ export const useYouTubeData = () => {
     };
   }, []);
 
-  return { featuredVideo, videoRows, loading, error, uploadedVideos };
+  return { featuredVideo, videoRows, loading, error, uploadedVideos, announcements, discussions };
 };
 
 // Export static for backward compatibility (will be overridden by hook)

@@ -8,4 +8,4 @@
 - [x] Delete unused file: src/components/import React from 'react';.js
 
 ## Pending Tasks
-- [ ] Run npm start and test functionality
+- [x] Run npm start and test functionality

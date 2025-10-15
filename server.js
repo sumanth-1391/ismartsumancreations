@@ -73,6 +73,68 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
 const GITHUB_REPO = process.env.GITHUB_REPO || 'sumanth-1391/ismartsumancreations'; // owner/repo
 const GITHUB_BRANCH = process.env.GITHUB_BRANCH || 'main';
 
+// Load persisted data from disk (if available) so server reflects saved uploads
+try {
+  if (fs.existsSync(DATA_JSON_PATH)) {
+    const raw = fs.readFileSync(DATA_JSON_PATH, 'utf8');
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.videos)) {
+        videos = parsed.videos.map(v => ({
+          ...v,
+          thumbnail: v.thumbnail || buildYouTubeThumbnail(v.url) || '/logo.png',
+          createdAt: v.createdAt || new Date().toISOString()
+        }));
+        console.log(`✅ Loaded ${videos.length} videos from ${DATA_JSON_PATH}`);
+      } else {
+        console.warn(`⚠️ ${DATA_JSON_PATH} parsed but no videos array found`);
+      }
+    } catch (e) {
+      console.error(`Failed to parse ${DATA_JSON_PATH}:`, e.message);
+    }
+  }
+} catch (e) {
+  console.error('Error while reading data.json:', e);
+}
+
+try {
+  if (fs.existsSync(ANNOUNCEMENTS_JSON_PATH)) {
+    const raw = fs.readFileSync(ANNOUNCEMENTS_JSON_PATH, 'utf8');
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.announcements)) {
+        announcements = parsed.announcements;
+        console.log(`✅ Loaded ${announcements.length} announcements from ${ANNOUNCEMENTS_JSON_PATH}`);
+      } else {
+        console.warn(`⚠️ ${ANNOUNCEMENTS_JSON_PATH} parsed but no announcements array found`);
+      }
+    } catch (e) {
+      console.error(`Failed to parse ${ANNOUNCEMENTS_JSON_PATH}:`, e.message);
+    }
+  }
+} catch (e) {
+  console.error('Error while reading announcements.json:', e);
+}
+
+try {
+  if (fs.existsSync(DISCUSSIONS_JSON_PATH)) {
+    const raw = fs.readFileSync(DISCUSSIONS_JSON_PATH, 'utf8');
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.discussions)) {
+        discussions = parsed.discussions;
+        console.log(`✅ Loaded ${discussions.length} discussions from ${DISCUSSIONS_JSON_PATH}`);
+      } else {
+        console.warn(`⚠️ ${DISCUSSIONS_JSON_PATH} parsed but no discussions array found`);
+      }
+    } catch (e) {
+      console.error(`Failed to parse ${DISCUSSIONS_JSON_PATH}:`, e.message);
+    }
+  }
+} catch (e) {
+  console.error('Error while reading discussions.json:', e);
+}
+
 async function githubGetFileSha(repoPath) {
   if (!GITHUB_TOKEN) return null;
   const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${repoPath}?ref=${GITHUB_BRANCH}`;
@@ -205,7 +267,9 @@ app.get('/api/videos', (req, res) => {
 app.post('/api/videos', (req, res) => {
   try {
     const video = req.body;
+    console.log('POST /api/videos payload:', video && (video.id ? `id=${video.id}` : JSON.stringify(video).slice(0,200)));
     if (!video || !video.id) {
+      console.warn('Invalid video payload received (missing id)');
       return res.status(400).json({ message: 'Invalid video payload' });
     }
     // ensure createdAt and thumbnail
@@ -214,14 +278,16 @@ app.post('/api/videos', (req, res) => {
       createdAt: video.createdAt || new Date().toISOString(),
       thumbnail: video.thumbnail || buildYouTubeThumbnail(video.url) || '/logo.png'
     };
-    videos.push(created);
+  videos.push(created);
     // also optionally create an announcement externally; Admin UI handles that
     // Persist to disk and attempt to commit to GitHub so deployed site picks up the change
     try {
-      writeJsonFileSafe(DATA_JSON_PATH, { videos });
+      const ok = writeJsonFileSafe(DATA_JSON_PATH, { videos });
+      console.log(`writeJsonFileSafe returned ${ok} for ${DATA_JSON_PATH}`);
       // Fire-and-forget GitHub commit
       githubPutFile('data.json', Buffer.from(JSON.stringify({ videos }, null, 2), 'utf8'), `chore: add video ${created.id}`)
-        .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); });
+        .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); else console.log('GitHub commit ok'); })
+        .catch(e => console.warn('GitHub commit threw', e));
     } catch (err) {
       console.warn('Failed to persist videos locally', err);
     }
