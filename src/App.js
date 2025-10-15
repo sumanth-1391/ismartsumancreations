@@ -104,11 +104,25 @@ function MainPage() {
       setFilteredRows([]);
       setCurrentVideo(null);
     };
+    const handleAnnouncementsChanged = () => {
+      // Force re-render by updating state
+      setFilteredRows([]);
+      setCurrentVideo(null);
+    };
+    const handleDiscussionsChanged = () => {
+      // Force re-render by updating state
+      setFilteredRows([]);
+      setCurrentVideo(null);
+    };
     window.addEventListener('uploadedVideosChanged', handleUploadedVideosChange);
     window.addEventListener('myListUpdated', handleMyListUpdated);
+    window.addEventListener('announcementsChanged', handleAnnouncementsChanged);
+    window.addEventListener('discussionsChanged', handleDiscussionsChanged);
     return () => {
       window.removeEventListener('uploadedVideosChanged', handleUploadedVideosChange);
       window.removeEventListener('myListUpdated', handleMyListUpdated);
+      window.removeEventListener('announcementsChanged', handleAnnouncementsChanged);
+      window.removeEventListener('discussionsChanged', handleDiscussionsChanged);
     };
   }, []);
 

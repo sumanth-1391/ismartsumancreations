@@ -191,6 +191,8 @@ export default function Admin() {
           imageFile: null
         });
         alert('Discussion posted successfully!');
+        // Notify main page to refresh
+        window.dispatchEvent(new Event('discussionsChanged'));
       } else {
         alert('Failed to post discussion');
       }
@@ -248,6 +250,8 @@ export default function Admin() {
         setAnnouncements(prev => [...prev, newAnnouncement]);
         setAnnouncementFormData({ title: '', content: '' });
         alert('Announcement posted successfully!');
+        // Notify main page to refresh
+        window.dispatchEvent(new Event('announcementsChanged'));
       } else {
         alert('Failed to post announcement');
       }
