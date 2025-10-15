@@ -267,13 +267,19 @@ export const useYouTubeData = () => {
     // Poll for updates every 30 seconds for global sync
     const interval = setInterval(fetchData, 30000);
 
-    // Also refresh immediately when admin uploads/updates/deletes videos
+    // Also refresh immediately when admin uploads/updates/deletes videos, announcements, or discussions
     const onUploaded = () => { fetchData(); };
+    const onAnnouncementsChanged = () => { fetchData(); };
+    const onDiscussionsChanged = () => { fetchData(); };
     window.addEventListener('uploadedVideosChanged', onUploaded);
+    window.addEventListener('announcementsChanged', onAnnouncementsChanged);
+    window.addEventListener('discussionsChanged', onDiscussionsChanged);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener('uploadedVideosChanged', onUploaded);
+      window.removeEventListener('announcementsChanged', onAnnouncementsChanged);
+      window.removeEventListener('discussionsChanged', onDiscussionsChanged);
     };
   }, []);
 
