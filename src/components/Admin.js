@@ -81,7 +81,7 @@ export default function Admin() {
 
   const handleAuth = (e) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
+    if (password.toLowerCase() === 'isc139') {
       setIsAuthenticated(true);
     } else {
       alert('Incorrect password');
