@@ -20,6 +20,8 @@ export const useYouTubeData = () => {
           featuredVideo: action.payload.featuredVideo,
           videoRows: action.payload.videoRows,
           uploadedVideos: action.payload.uploadedVideos,
+          announcements: action.payload.announcements,
+          discussions: action.payload.discussions,
           loading: false,
           error: null
         };
