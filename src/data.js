@@ -264,9 +264,6 @@ export const useYouTubeData = () => {
   useEffect(() => {
     fetchData();
 
-    // Poll for updates every 30 seconds for global sync
-    const interval = setInterval(fetchData, 30000);
-
     // Also refresh immediately when admin uploads/updates/deletes videos, announcements, or discussions
     const onUploaded = () => { fetchData(); };
     const onAnnouncementsChanged = () => { fetchData(); };
@@ -276,7 +273,6 @@ export const useYouTubeData = () => {
     window.addEventListener('discussionsChanged', onDiscussionsChanged);
 
     return () => {
-      clearInterval(interval);
       window.removeEventListener('uploadedVideosChanged', onUploaded);
       window.removeEventListener('announcementsChanged', onAnnouncementsChanged);
       window.removeEventListener('discussionsChanged', onDiscussionsChanged);
