@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-module.exports = (req, res) => {
+export default (req, res) => {
   try {
     const file = path.join(process.cwd(), 'discussions.json');
     if (!fs.existsSync(file)) {
