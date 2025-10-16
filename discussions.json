@@ -10,6 +10,15 @@
         "a",
         "a"
       ]
+    },
+    {
+      "id": 2,
+      "title": "Test Discussion",
+      "content": "This is a test",
+      "type": "text",
+      "pollOptions": [],
+      "imageUrl": null,
+      "createdAt": "2025-10-16T06:38:42.032Z"
     }
   ]
 }
