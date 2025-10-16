@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import fs from 'fs';
+import multer from 'multer';
 import path from 'path';
 
 const app = express();
@@ -8,6 +9,10 @@ const PORT = process.env.PORT || 5001; // Use PORT from environment for deployme
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Configure multer for file uploads
+const upload = multer({ dest: 'uploads/' });
 
 // Serve static files from the React app build directory
 if (process.env.NODE_ENV === 'production') {
@@ -404,12 +409,21 @@ app.delete('/api/announcements/:id', (req, res) => {
 });
 
 // ✅ POST discussion
-app.post('/api/discussions', (req, res) => {
+app.post('/api/discussions', upload.single('image'), (req, res) => {
   try {
-    const { title, content, type, pollOptions, imageUrl } = req.body;
+    let { title, content, type, pollOptions } = req.body;
 
     if (!title || !content || !type) {
       return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Handle pollOptions if it's a string (from form data)
+    if (pollOptions && typeof pollOptions === 'string') {
+      try {
+        pollOptions = JSON.parse(pollOptions);
+      } catch (e) {
+        pollOptions = [];
+      }
     }
 
     const newDiscussion = {
@@ -418,8 +432,8 @@ app.post('/api/discussions', (req, res) => {
       content,
       type,
       pollOptions: pollOptions || [],
-      imageUrl: imageUrl || null,
-      createdAt: new Date(),
+      imageUrl: req.file ? `/uploads/${req.file.filename}` : null,
+      createdAt: new Date().toISOString(),
     };
 
     discussions.push(newDiscussion);
@@ -430,13 +444,31 @@ app.post('/api/discussions', (req, res) => {
     } catch (err) {
       console.warn('Failed to persist discussions locally', err);
     }
-    res.status(201).json({
-      message: 'Discussion posted successfully',
-      newDiscussion,
-    });
+    res.status(201).json(newDiscussion);
   } catch (err) {
     console.error('Error posting discussion:', err);
     res.status(500).json({ message: 'Server error posting discussion' });
+  }
+});
+
+// DELETE discussion
+app.delete('/api/discussions/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const before = discussions.length;
+    discussions = discussions.filter(d => String(d.id) !== String(id));
+    if (discussions.length === before) return res.status(404).json({ message: 'Discussion not found' });
+    try {
+      writeJsonFileSafe(DISCUSSIONS_JSON_PATH, { discussions });
+      githubPutFile('discussions.json', Buffer.from(JSON.stringify({ discussions }, null, 2), 'utf8'), `chore: delete discussion ${id}`)
+        .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); });
+    } catch (err) {
+      console.warn('Failed to persist discussions locally', err);
+    }
+    res.status(200).json({ message: 'Discussion deleted' });
+  } catch (err) {
+    console.error('Error deleting discussion:', err);
+    res.status(500).json({ message: 'Server error deleting discussion' });
   }
 });
 

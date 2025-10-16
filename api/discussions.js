@@ -49,29 +49,41 @@ export default (req, res) => {
     }
   } else if (req.method === 'POST') {
     try {
-      const { title, content, type, pollOptions, imageUrl } = req.body;
+      let title, content, type, pollOptions, imageUrl;
+
+      // Handle multipart/form-data
+      if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+        // For multipart, fields are in req.body as strings or files
+        title = req.body.title;
+        content = req.body.content;
+        type = req.body.type;
+        pollOptions = req.body.pollOptions;
+        imageUrl = req.body.imageUrl; // This might be a file
+      } else {
+        // Handle JSON
+        ({ title, content, type, pollOptions, imageUrl } = req.body);
+      }
+
       if (!title || !content || !type) {
         res.statusCode = 400;
         return res.end(JSON.stringify({ message: 'Missing required fields' }));
       }
+
       const discussions = loadDiscussions();
       const newDiscussion = {
         id: discussions.length + 1,
         title,
         content,
         type,
-        pollOptions: pollOptions || [],
+        pollOptions: pollOptions ? (typeof pollOptions === 'string' ? JSON.parse(pollOptions) : pollOptions) : [],
         imageUrl: imageUrl || null,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       };
       discussions.push(newDiscussion);
       if (saveDiscussions(discussions)) {
         res.statusCode = 201;
         res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({
-          message: 'Discussion posted successfully',
-          newDiscussion,
-        }));
+        res.end(JSON.stringify(newDiscussion));
       } else {
         res.statusCode = 500;
         res.end(JSON.stringify({ message: 'Failed to save discussion' }));
