@@ -19,6 +19,19 @@
       "pollOptions": [],
       "imageUrl": null,
       "createdAt": "2025-10-16T06:38:42.032Z"
+    },
+    {
+      "id": 3,
+      "title": "Poll Test",
+      "content": "What is your favorite color?",
+      "type": "poll",
+      "pollOptions": [
+        "Red",
+        "Blue",
+        "Green"
+      ],
+      "imageUrl": null,
+      "createdAt": "2025-10-16T06:38:52.681Z"
     }
   ]
 }
