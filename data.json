@@ -249,6 +249,21 @@
       "duration": "N/A",
       "categories": [],
       "createdAt": "2025-10-16T05:08:34.624Z"
+    },
+    {
+      "id": "cli-test-1760593013424",
+      "title": "CLI Test Video",
+      "description": "Uploaded by test script",
+      "url": "https://youtu.be/dQw4w9WgXcQ",
+      "thumbnail": "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
+      "publishedAt": "2025-10-16T05:36:53.425Z",
+      "viewCount": 0,
+      "likeCount": 0,
+      "duration": "N/A",
+      "categories": [
+        "Test"
+      ],
+      "createdAt": "2025-10-16T05:36:53.554Z"
     }
   ]
 }
