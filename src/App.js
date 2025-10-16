@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Admin from './components/Admin.js';
 import Announcements from './components/Announcements.js';
@@ -299,7 +299,24 @@ function MainPage() {
   );
 }
 
-export default function App() {
+function AppContent() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Handle client-side routing for GitHub Pages
+    const handleGitHubPagesRouting = () => {
+      const path = window.location.pathname;
+      if (path.startsWith('/ismartsumancreations/')) {
+        const route = path.replace('/ismartsumancreations', '') || '/';
+        if (route !== path) {
+          navigate(route, { replace: true });
+        }
+      }
+    };
+
+    handleGitHubPagesRouting();
+  }, [navigate]);
+
   return (
     <Routes>
       <Route path="/admin" element={<Admin />} />
@@ -309,4 +326,8 @@ export default function App() {
       <Route path="/" element={<MainPage />} />
     </Routes>
   );
+}
+
+export default function App() {
+  return <AppContent />;
 }
