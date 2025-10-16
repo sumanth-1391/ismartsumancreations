@@ -4,10 +4,15 @@ import fs from 'fs';
 import path from 'path';
 
 const app = express();
-const PORT = 5001; // ← your curl command used 5001
+const PORT = process.env.PORT || 5001; // Use PORT from environment for deployment
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from the React app build directory
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(process.cwd(), 'build')));
+}
 
 // Simple request logger to help debug which routes are being hit
 app.use((req, res, next) => {
@@ -434,6 +439,13 @@ app.post('/api/discussions', (req, res) => {
     res.status(500).json({ message: 'Server error posting discussion' });
   }
 });
+
+// Catch all handler: send back React's index.html file for client-side routing
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'build', 'index.html'));
+  });
+}
 
 // Start server
 app.listen(PORT, () => console.log(`✅ Server running on http://localhost:${PORT}`));
