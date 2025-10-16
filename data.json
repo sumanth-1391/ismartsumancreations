@@ -236,6 +236,19 @@
         "ISC Originals"
       ],
       "createdAt": "2025-10-14T19:13:19.959Z"
+    },
+    {
+      "id": "test-1760591314441",
+      "title": "CLI Test Video",
+      "description": "Uploaded via script",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "thumbnail": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+      "publishedAt": "2025-10-16T05:08:34.441Z",
+      "viewCount": 0,
+      "likeCount": 0,
+      "duration": "N/A",
+      "categories": [],
+      "createdAt": "2025-10-16T05:08:34.624Z"
     }
   ]
 }
