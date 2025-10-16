@@ -289,18 +289,17 @@ app.post('/api/videos', (req, res) => {
       thumbnail: video.thumbnail || buildYouTubeThumbnail(video.url) || '/logo.png'
     };
   videos.push(created);
-    // also optionally create an announcement externally; Admin UI handles that
-    // Persist to disk and attempt to commit to GitHub so deployed site picks up the change
-    try {
-      const ok = writeJsonFileSafe(DATA_JSON_PATH, { videos });
-      console.log(`writeJsonFileSafe returned ${ok} for ${DATA_JSON_PATH}`);
-      // Fire-and-forget GitHub commit
-      githubPutFile('data.json', Buffer.from(JSON.stringify({ videos }, null, 2), 'utf8'), `chore: add video ${created.id}`)
-        .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); else console.log('GitHub commit ok'); })
-        .catch(e => console.warn('GitHub commit threw', e));
-    } catch (err) {
-      console.warn('Failed to persist videos locally', err);
+    // Persist to disk
+    const ok = writeJsonFileSafe(DATA_JSON_PATH, { videos });
+    if (!ok) {
+      console.error('Failed to save videos to disk');
+      return res.status(500).json({ message: 'Failed to save video' });
     }
+
+    // Fire-and-forget GitHub commit
+    githubPutFile('data.json', Buffer.from(JSON.stringify({ videos }, null, 2), 'utf8'), `chore: add video ${created.id}`)
+      .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); else console.log('GitHub commit ok'); })
+      .catch(e => console.warn('GitHub commit threw', e));
 
     res.status(201).json(created);
   } catch (err) {
@@ -324,13 +323,13 @@ app.put('/api/videos/:id', (req, res) => {
       thumbnail: updated.thumbnail || videos[idx].thumbnail || buildYouTubeThumbnail(updated.url) || '/logo.png'
     };
     videos[idx] = merged;
-    try {
-      writeJsonFileSafe(DATA_JSON_PATH, { videos });
-      githubPutFile('data.json', Buffer.from(JSON.stringify({ videos }, null, 2), 'utf8'), `chore: update video ${id}`)
-        .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); });
-    } catch (err) {
-      console.warn('Failed to persist videos locally', err);
+    const ok = writeJsonFileSafe(DATA_JSON_PATH, { videos });
+    if (!ok) {
+      console.error('Failed to save videos to disk');
+      return res.status(500).json({ message: 'Failed to update video' });
     }
+    githubPutFile('data.json', Buffer.from(JSON.stringify({ videos }, null, 2), 'utf8'), `chore: update video ${id}`)
+      .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); });
     res.status(200).json(merged);
   } catch (err) {
     console.error('Error updating video:', err);
@@ -345,13 +344,13 @@ app.delete('/api/videos/:id', (req, res) => {
     const before = videos.length;
     videos = videos.filter(v => String(v.id) !== String(id));
     if (videos.length === before) return res.status(404).json({ message: 'Video not found' });
-    try {
-      writeJsonFileSafe(DATA_JSON_PATH, { videos });
-      githubPutFile('data.json', Buffer.from(JSON.stringify({ videos }, null, 2), 'utf8'), `chore: delete video ${id}`)
-        .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); });
-    } catch (err) {
-      console.warn('Failed to persist videos locally', err);
+    const ok = writeJsonFileSafe(DATA_JSON_PATH, { videos });
+    if (!ok) {
+      console.error('Failed to save videos to disk');
+      return res.status(500).json({ message: 'Failed to delete video' });
     }
+    githubPutFile('data.json', Buffer.from(JSON.stringify({ videos }, null, 2), 'utf8'), `chore: delete video ${id}`)
+      .then(r => { if (!r.ok) console.warn('GitHub commit failed', r); });
     res.status(200).json({ message: 'Video deleted' });
   } catch (err) {
     console.error('Error deleting video:', err);
