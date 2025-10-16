@@ -2,6 +2,7 @@
   "name": "ismart-suman-creations-web",
   "version": "1.0.0",
   "description": "A OTT video streaming platform",
+  "homepage": "https://sumanth-1391.github.io/ismartsumancreations",
   "type": "module",
   "main": "index.js",
   "scripts": {
