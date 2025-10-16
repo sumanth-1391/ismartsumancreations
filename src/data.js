@@ -2,6 +2,7 @@ import { useEffect, useReducer } from 'react';
 
 // For production, allow using an environment variable set by Vercel: REACT_APP_API_BASE_URL
 // Fallback to same-origin (window.location.origin) so APIs hosted on the same domain work.
+// For GitHub Pages, we'll use a fallback since the API can't run there.
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || (process.env.NODE_ENV === 'production'
   ? (typeof window !== 'undefined' ? window.location.origin : 'https://your-deployed-server.com')
   : 'http://localhost:5001');
@@ -46,30 +47,52 @@ export const useYouTubeData = () => {
 
       console.log('Loading videos from server...');
 
-      // Fetch videos
-      const response = await fetch(`${API_BASE_URL}/api/videos`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch videos from server');
+      // For GitHub Pages, we can't run the API server, so use fallback data
+      let uploaded = [];
+      if (process.env.NODE_ENV === 'production' && window.location.hostname.includes('github.io')) {
+        console.log('GitHub Pages detected - using fallback data');
+        // Use fallback data for GitHub Pages since API can't run there
+        uploaded = [
+          {
+            id: '1',
+            title: 'Welcome to ISMART SUMAN CREATIONS',
+            description: 'Film production company and YouTube channel',
+            thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+            videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+            categories: ['ISC Originals'],
+            uploadDate: new Date().toISOString(),
+            viewCount: 1000
+          }
+        ];
+      } else {
+        // Fetch videos from API
+        const response = await fetch(`${API_BASE_URL}/api/videos`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch videos from server');
+        }
+        uploaded = await response.json();
       }
 
-      const uploaded = await response.json();
-
-      // Fetch announcements (best-effort)
+      // Fetch announcements (best-effort) - skip for GitHub Pages
       let announcements = [];
-      try {
-        const aRes = await fetch(`${API_BASE_URL}/api/announcements`);
-        if (aRes.ok) announcements = await aRes.json();
-      } catch (e) {
-        console.warn('Failed to load announcements', e);
+      if (!(process.env.NODE_ENV === 'production' && window.location.hostname.includes('github.io'))) {
+        try {
+          const aRes = await fetch(`${API_BASE_URL}/api/announcements`);
+          if (aRes.ok) announcements = await aRes.json();
+        } catch (e) {
+          console.warn('Failed to load announcements', e);
+        }
       }
 
-      // Fetch discussions (best-effort)
+      // Fetch discussions (best-effort) - skip for GitHub Pages
       let discussions = [];
-      try {
-        const dRes = await fetch(`${API_BASE_URL}/api/discussions`);
-        if (dRes.ok) discussions = await dRes.json();
-      } catch (e) {
-        console.warn('Failed to load discussions', e);
+      if (!(process.env.NODE_ENV === 'production' && window.location.hostname.includes('github.io'))) {
+        try {
+          const dRes = await fetch(`${API_BASE_URL}/api/discussions`);
+          if (dRes.ok) discussions = await dRes.json();
+        } catch (e) {
+          console.warn('Failed to load discussions', e);
+        }
       }
 
       console.log(`Loaded ${uploaded.length} videos from server`);
