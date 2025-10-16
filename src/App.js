@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import styled from 'styled-components';
-import Admin from './components/Admin';
-import Announcements from './components/Announcements';
-import Banner from './components/Banner';
-import Discussions from './components/Discussions';
-import Header from './components/Header';
-import MyList from './components/MyList';
-import VideoPlayer from './components/VideoPlayer';
-import VideoRow from './components/VideoRow';
-import { useYouTubeData } from './data';
+import Admin from './components/Admin.js';
+import Announcements from './components/Announcements.js';
+import Banner from './components/Banner.js';
+import Discussions from './components/Discussions.js';
+import Header from './components/Header.js';
+import MyList from './components/MyList.js';
+import VideoPlayer from './components/VideoPlayer.js';
+import VideoRow from './components/VideoRow.js';
+import { useYouTubeData } from './data.js';
 
 const AppContainer = styled.div`
   background-color: #141414;
@@ -223,10 +223,6 @@ function MainPage() {
 
   return (
     <AppContainer>
-      {/* DEBUG BANNER - visible in production to help troubleshooting */}
-      <div style={{ background: '#222', color: '#fff', padding: '6px 12px', textAlign: 'center' }}> 
-        <strong>Debug:</strong> Last fetch: {debugStatus.lastFetch || '—'} | Videos: {debugStatus.videos} | Announcements: {debugStatus.announcements} | Discussions: {debugStatus.discussions} | Status: {debugStatus.ok ? 'OK' : (loading ? 'Loading' : (error ? 'Error' : 'Idle'))}
-      </div>
       <Header onSearch={handleSearch} videos={uploadedVideos} onNavClick={(navItem) => {
         if (navItem === 'Recommended for You') {
           setShowOnlyRecommended(true);
@@ -234,28 +230,8 @@ function MainPage() {
           setShowOnlyRecommended(false);
         }
       }} />
-      {/* Announcements preview */}
-      {announcements && announcements.length > 0 && (
-        <div style={{ maxWidth: 1000, margin: '20px auto', padding: '10px 20px', background: '#0f0f0f', borderRadius: 8 }}>
-          <h3 style={{ color: '#e50914', margin: 0 }}>Latest Announcements</h3>
-          <ul style={{ margin: '8px 0 0 0', padding: 0, listStyle: 'none', color: '#ddd' }}>
-            {announcements.slice(0,3).map(a => (
-              <li key={a.id} style={{ padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>{a.title}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {/* Discussions preview */}
-      {discussions && discussions.length > 0 && (
-        <div style={{ maxWidth: 1000, margin: '10px auto 20px', padding: '10px 20px', background: '#0f0f0f', borderRadius: 8 }}>
-          <h3 style={{ color: '#e50914', margin: 0 }}>Recent Discussions</h3>
-          <ul style={{ margin: '8px 0 0 0', padding: 0, listStyle: 'none', color: '#ddd' }}>
-            {discussions.slice(0,3).map(d => (
-              <li key={d.id} style={{ padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>{d.title}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+
+
       <Banner video={currentVideo} onVideoPlay={handleVideoPlay} />
       <MainContent>
         {filteredRows.length > 0 ? (

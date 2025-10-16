@@ -1,6 +1,55 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+`;
+
+const ModalTitle = styled.h2`
+  margin-top: 0;
+  color: #333;
+`;
+
+const ModalDescription = styled.p`
+  color: #666;
+  line-height: 1.6;
+`;
+
+const CloseButton = styled.button`
+  background: #e50914;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 20px;
+
+  &:hover {
+    background: #ff6b6b;
+  }
+`;
+
 const BannerContainer = styled.div`
   background-image: url(${props => props.bgImage});
   background-size: cover;
@@ -119,7 +168,7 @@ const PlayButton = styled.button`
   }
 `;
 
-const WatchNowButton = styled.button`
+const MoreInfoButton = styled.button`
   background-color: transparent;
   color: #fff;
   border: 2px solid #fff;
@@ -145,7 +194,11 @@ const WatchNowButton = styled.button`
   }
 `;
 
+
+
 export default function Banner({ video, onVideoPlay }) {
+  const [showModal, setShowModal] = useState(false);
+
   if (!video) {
     return null;
   }
@@ -170,6 +223,14 @@ export default function Banner({ video, onVideoPlay }) {
     }
   };
 
+  const handleMoreInfo = () => {
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
   return (
     <BannerContainer bgImage={video.thumbnail}>
       {/* Render img thumbnail with fallbacks on error */}
@@ -180,9 +241,18 @@ export default function Banner({ video, onVideoPlay }) {
         <Description>{video.description}</Description>
         <div>
           <PlayButton onClick={handlePlay}>Play</PlayButton>
-          <WatchNowButton onClick={handlePlay}>Watch Now</WatchNowButton>
+          <MoreInfoButton onClick={handleMoreInfo}>More Info</MoreInfoButton>
         </div>
       </Content>
+      {showModal && (
+        <Modal onClick={closeModal}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalTitle>{video.title}</ModalTitle>
+            <ModalDescription>{video.description}</ModalDescription>
+            <CloseButton onClick={closeModal}>Close</CloseButton>
+          </ModalContent>
+        </Modal>
+      )}
     </BannerContainer>
   );
 }

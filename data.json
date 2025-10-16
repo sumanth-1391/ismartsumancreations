@@ -208,21 +208,6 @@
       "createdAt": "2025-10-14T19:13:19.959Z"
     },
     {
-      "id": "1760455755606",
-      "title": "jersey | Nani | Emotional Scene | ISMART SUMAN CREATIONS ",
-      "description": "The storyline follows Arjun (Nani), a talented but failed cricketer who decides to return to cricket in his mid-30s, driven by the desire to represent the Indian cricket team, and fulfill his son's wish for a jersey as a gift.",
-      "url": "https://youtu.be/jrgobIxJ-LQ",
-      "thumbnail": "https://img.youtube.com/vi/jrgobIxJ-LQ/maxresdefault.jpg",
-      "publishedAt": "2025-10-14T15:29:15.606Z",
-      "viewCount": 0,
-      "likeCount": 0,
-      "duration": "N/A",
-      "categories": [
-        "ISC Originals"
-      ],
-      "createdAt": "2025-10-14T19:13:19.959Z"
-    },
-    {
       "id": "1760455799004",
       "title": "MOMENTS OF 2024 | All in one promo video | ismart Suman creations#ismartsumancreations",
       "description": "momentsof2024",
@@ -251,47 +236,6 @@
         "ISC Originals"
       ],
       "createdAt": "2025-10-14T19:13:19.959Z"
-    },
-    {
-      "id": "cli-test-1760469497770",
-      "title": "CLI Test Video",
-      "description": "Uploaded by test script",
-      "url": "https://youtu.be/dQw4w9WgXcQ",
-      "thumbnail": "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
-      "publishedAt": "2025-10-14T19:18:17.770Z",
-      "viewCount": 0,
-      "likeCount": 0,
-      "duration": "N/A",
-      "categories": [
-        "Test"
-      ],
-      "createdAt": "2025-10-14T19:18:17.945Z"
-    },
-    {
-      "id": "test-video-123",
-      "title": "Test Video From CLI",
-      "description": "Uploaded via curl for testing",
-      "url": "https://youtu.be/dQw4w9WgXcQ",
-      "thumbnail": "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
-      "publishedAt": "2025-10-15T00:00:00.000Z",
-      "viewCount": 0,
-      "likeCount": 0,
-      "duration": "N/A",
-      "categories": [
-        "Test"
-      ],
-      "createdAt": "2025-10-14T19:20:09.745Z"
-    },
-    {
-      "id": "test123",
-      "title": "Test Video",
-      "description": "Test Description",
-      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "categories": [
-        "ISC Originals"
-      ],
-      "createdAt": "2025-10-15T09:24:56.101Z",
-      "thumbnail": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
     }
   ]
 }

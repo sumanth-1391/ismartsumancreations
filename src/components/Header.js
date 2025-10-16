@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -93,77 +93,12 @@ const RightSection = styled.div`
   gap: 20px;
 `;
 
-const NotificationButton = styled.button`
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border: none;
-  padding: 10px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 18px;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  position: relative;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.05);
-  }
-
-  &::before {
-    content: '🔔';
-    color: #fff;
-    font-size: 20px;
-  }
-`;
-
-const NotificationBadge = styled.span`
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  background: #e50914;
-  color: #fff;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
-`;
-
 
 
 export default function Header({ onSearch, videos = [], onNavClick }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [announcementCount, setAnnouncementCount] = useState(0);
-
-  // Fetch announcement count for notification badge
-  useEffect(() => {
-    const fetchAnnouncementCount = async () => {
-      try {
-        const response = await fetch(`${process.env.NODE_ENV === 'production' ? 'https://your-deployed-server.com' : 'http://localhost:5001'}/api/announcements`);
-        if (response.ok) {
-          const announcements = await response.json();
-          setAnnouncementCount(announcements.length);
-        }
-      } catch (error) {
-        console.error('Error fetching announcements:', error);
-      }
-    };
-
-    fetchAnnouncementCount();
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchAnnouncementCount, 30000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleInputChange = (e) => {
     const query = e.target.value;
@@ -256,11 +191,6 @@ export default function Header({ onSearch, videos = [], onNavClick }) {
         </SearchContainer>
       </Nav>
       <RightSection>
-        <NotificationButton onClick={() => window.location.href = '/announcements'}>
-          {announcementCount > 0 && (
-            <NotificationBadge>{announcementCount > 99 ? '99+' : announcementCount}</NotificationBadge>
-          )}
-        </NotificationButton>
         <ProfileIcon />
       </RightSection>
     </HeaderContainer>
