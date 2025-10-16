@@ -1,21 +1,14 @@
-# TODO: Add Video Player with Google Ads
+# TODO: Fix Admin Panel Not Reflecting Changes in Main Page
 
-## Completed Tasks
-- [x] Analyze requirements for video player with ads
-- [x] Plan implementation steps
-- [x] Create VideoPlayer.js component with YouTube embed and AdSense ads
-- [x] Add player state management to App.js
-- [x] Modify Banner.js click handler to open player
-- [x] Modify VideoRow.js click handler to open player
-- [x] Add Google AdSense script to index.html
-- [x] Test video player functionality and ad display
-- [x] Verify responsive design and close functionality
-- [x] Install react-router-dom
-- [x] Set up routing in index.js
-- [x] Create Admin.js with upload form and auth
-- [x] Update data.js to merge YouTube and uploaded videos
-- [x] Add admin access via /admin route
-- [x] Create public/uploads directory for thumbnails
+## Problem
+The Admin panel uploads videos, announcements, and discussions, but changes do not reflect on the main page in production. This is because the serverless API functions (api/videos.js, api/announcements.js, api/discussions.js) only handle GET requests, while the Admin component sends POST/PUT/DELETE requests.
 
-## Pending Tasks
-- [x] Test admin panel functionality and upload reflection
+## Solution
+Update the serverless functions to handle full CRUD operations, similar to server.js.
+
+## Steps
+- [x] Update api/videos.js to handle POST (create), PUT (update), DELETE (delete) for videos, persisting to data.json
+- [x] Update api/announcements.js to handle POST (create), DELETE (delete) for announcements, persisting to announcements.json
+- [x] Update api/discussions.js to handle POST (create), DELETE (delete) for discussions, persisting to discussions.json
+- [x] Test Admin panel functionality after updates (server started successfully, loaded data from JSON files)
+- [ ] Verify that changes reflect on main page immediately (requires manual testing in browser)
