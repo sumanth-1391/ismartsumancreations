@@ -1,7 +1,7 @@
 // Simple parser check: require the files to ensure no syntax errors when Node transpiles them.
 // Note: this will only check CommonJS parse; since these are .js with JSX, Node may fail unless transpiled.
 // We'll perform a lightweight file read to check for unbalanced braces/parentheses as a heuristic.
-const fs = require('fs');
+import fs from 'fs';
 const paths = [
   'src/components/VideoRow.js',
   'src/components/MyList.js',
