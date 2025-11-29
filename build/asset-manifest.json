@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/ismartsumancreations/static/js/main.739d4e35.js",
+    "main.js": "/ismartsumancreations/static/js/main.4ce22b30.js",
     "index.html": "/ismartsumancreations/index.html",
-    "main.739d4e35.js.map": "/ismartsumancreations/static/js/main.739d4e35.js.map"
+    "main.4ce22b30.js.map": "/ismartsumancreations/static/js/main.4ce22b30.js.map"
   },
   "entrypoints": [
-    "static/js/main.739d4e35.js"
+    "static/js/main.4ce22b30.js"
   ]
 }
