@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import styled from 'styled-components';
 
 const PlayerOverlay = styled.div`
@@ -125,15 +125,7 @@ const ActionButton = styled.button`
   }
 `;
 
-const AdContainer = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 10;
-  pointer-events: none;
-`;
+
 
 const VideoFrame = styled.iframe`
   width: 100%;
@@ -174,9 +166,6 @@ const getYouTubeVideoId = (url) => {
 };
 
 const VideoPlayer = ({ video, onClose }) => {
-  const playerRef = useRef(null);
-  const adContainerRef = useRef(null);
-  const [adsManager, setAdsManager] = useState(null);
 
   const handleAddToList = () => {
     const myList = JSON.parse(localStorage.getItem('myList') || '[]');
@@ -250,89 +239,9 @@ const VideoPlayer = ({ video, onClose }) => {
     // Keep only last 50 interactions
     localStorage.setItem('userInteractions', JSON.stringify(userInteractions.slice(0, 50)));
 
-    // Initialize IMA SDK for full-length ads
-    const initializeIMA = () => {
-      if (window.google && window.google.ima) {
-        const videoId = getYouTubeVideoId(video.url);
-        if (videoId && adContainerRef.current) {
-          const adDisplayContainer = new window.google.ima.AdDisplayContainer(
-            adContainerRef.current,
-            playerRef.current
-          );
-
-          const adsLoader = new window.google.ima.AdsLoader(adDisplayContainer);
-
-          adsLoader.addEventListener(
-            window.google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
-            (adsManagerLoadedEvent) => {
-              const adsManager = adsManagerLoadedEvent.getAdsManager(playerRef.current);
-              setAdsManager(adsManager);
-
-              // Configure ads manager for full-length ads
-              adsManager.addEventListener(
-                window.google.ima.AdEvent.Type.LOADED,
-                () => {
-                  adsManager.start();
-                }
-              );
-
-              adsManager.addEventListener(
-                window.google.ima.AdEvent.Type.ALL_ADS_COMPLETED,
-                () => {
-                  // Ads completed, video can play
-                }
-              );
-
-              adsManager.init(1280, 720, window.google.ima.ViewMode.NORMAL);
-            }
-          );
-
-          adsLoader.addEventListener(
-            window.google.ima.AdErrorEvent.Type.AD_ERROR,
-            (adErrorEvent) => {
-              console.error('Ad error:', adErrorEvent.getError());
-              // Continue with video if ads fail
-            }
-          );
-
-          // Request ads using your AdSense video ad unit for monetization
-          const adsRequest = new window.google.ima.AdsRequest();
-          adsRequest.adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?' +
-            'iu=/YOUR_AD_UNIT_CODE&' +  // Replace with your actual ad unit code from AdSense
-            'description_url=' + encodeURIComponent(window.location.href) + '&' +
-            'tfcd=0&' +
-            'npa=0&' +
-            'sz=640x480&' +
-            'cust_params=&' +
-            'gdfp_req=1&' +
-            'env=vp&' +
-            'output=vast&' +
-            'unviewed_position_start=1&' +
-            'url=' + encodeURIComponent(window.location.href) + '&' +
-            'correlator=' + Date.now();
-
-          adsLoader.requestAds(adsRequest);
-          adDisplayContainer.initialize();
-        }
-      }
-    };
-
-    // Load IMA SDK if not already loaded
-    if (!window.google || !window.google.ima) {
-      const script = document.createElement('script');
-      script.src = '//imasdk.googleapis.com/js/sdkloader/ima3.js';
-      script.onload = initializeIMA;
-      document.head.appendChild(script);
-    } else {
-      initializeIMA();
-    }
-
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
-      if (adsManager) {
-        adsManager.destroy();
-      }
     };
   }, [onClose, video.url]);
 
@@ -347,10 +256,8 @@ const VideoPlayer = ({ video, onClose }) => {
       <PlayerContainer onClick={(e) => e.stopPropagation()}>
         <CloseButton onClick={onClose}>×</CloseButton>
         <VideoSection>
-          <AdContainer ref={adContainerRef} />
           <VideoFrame
-            ref={playerRef}
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&enablejsapi=1`}
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
             title={video.title}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
